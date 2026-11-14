@@ -1,0 +1,36 @@
+    <section class="mx-auto max-w-6xl px-4 pb-6 pt-10 sm:pt-14">
+      <nav class="vp-crumbs" aria-label="Breadcrumb">
+        <a href="<%= root %>index.html">Home</a><span aria-hidden="true">/</span>
+        <span aria-current="page">All converters</span>
+      </nav>
+      <h1 class="vp-h1"><%= page.h1 %></h1>
+      <p class="vp-lede"><%= page.intro %></p>
+      <p class="vp-pill mt-5"><span aria-hidden="true">🛡️</span> Every converter runs locally in your browser &mdash; Zero Server Uploads</p>
+      <ul class="mt-6 flex flex-wrap gap-2" aria-label="Jump to category">
+<% groups.forEach(function (group) { %>
+        <li><a class="vp-btn vp-btn-outline vp-btn-sm" href="#<%= group.id %>"><%= group.title %> <span class="vp-muted">(<%= group.tools.length %>)</span></a></li>
+<% }); %>
+      </ul>
+    </section>
+
+<% groups.forEach(function (group) { %>
+    <section id="<%= group.id %>" class="mx-auto max-w-6xl scroll-mt-20 px-4 pb-10" aria-labelledby="<%= group.id %>-title">
+      <h2 id="<%= group.id %>-title" class="vp-h2"><%= group.title %></h2>
+      <p class="mt-1 text-sm vp-muted"><%= group.blurb %></p>
+      <ul class="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+<% group.tools.forEach(function (tool) { %>
+        <li><a class="vp-tool" href="<%= root %>tools/<%= tool.slug %>.html"><span class="vp-tool-name"><%= tool.name %></span><span class="vp-tool-meta"><%= tool.formatLabel %> &middot; <%= tool.presetLabel %></span></a></li>
+<% }); %>
+      </ul>
+    </section>
+<% }); %>
+
+    <section class="mx-auto max-w-6xl px-4 pb-16">
+      <div class="vp-card flex flex-wrap items-center gap-4 p-6">
+        <div class="min-w-0 flex-1">
+          <h2 class="vp-h3">Document not listed?</h2>
+          <p class="mt-1 text-sm vp-muted">The general converter auto-detects invoices, receipts and statements from any issuer, and a custom regex template covers unusual layouts.</p>
+        </div>
+        <a class="vp-btn vp-btn-accent" href="<%= root %>index.html">Open the general converter</a>
+      </div>
+    </section>

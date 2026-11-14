@@ -1,0 +1,46 @@
+{
+  "brand": {
+    "name": "VaultParse",
+    "tagline": "PDF invoices, receipts and bank statements to clean CSV, Excel and JSON. Entirely in your browser.",
+    "shortDescription": "Free, private PDF to CSV / Excel / JSON converter for invoices, receipts and bank statements. Runs 100% in your browser. No uploads.",
+    "themeColorDark": "#090D16",
+    "themeColorLight": "#F8FAFC",
+    "language": "en"
+  },
+  "siteUrl": "https://100-1824.github.io/vaultparse",
+  "repository": "https://github.com/100-1824/vaultparse",
+  "pro": {
+    "priceLabel": "$15",
+    "priceNote": "one-time, lifetime key",
+    "checkoutProvider": "LemonSqueezy",
+    "checkoutUrl": "",
+    "licenseSalt": "9a9e6c03ec41ea9a05eabd33",
+    "freeBatchLimit": 3
+  },
+  "indexNow": {
+    "key": "947bf9fc768ce8965b16e571d66a02c6",
+    "endpoint": "https://api.indexnow.org/indexnow"
+  },
+  "cdn": {
+    "pdfjs": {
+      "src": "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js",
+      "integrity": "sha384-/1qUCSGwTur9vjf/z9lmu/eCUYbpOTgSjmpbMQZ1/CtX2v/WcAIKqRv+U1DUCG6e"
+    },
+    "pdfjsWorker": {
+      "src": "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js",
+      "integrity": "sha384-SnzOobpRMLXZ52iJvZm/C0fYw0OQemTXzTjIsdsfMcrCtCEe9qgzxTd3RSklO5x2"
+    },
+    "pdfjsCMaps": "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/cmaps/",
+    "papaparse": {
+      "src": "https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js",
+      "integrity": "sha384-D/t0ZMqQW31H3az8ktEiNb39wyKnS82iFY52QPACM+IjKW3jDUhyIgh2PApRqJZs"
+    },
+    "xlsx": {
+      "src": "https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js",
+      "integrity": "sha384-vtjasyidUo0kW94K5MXDXntzOJpQgBKXmE7e2Ga4LG0skTTLeBi97eFAXsqewJjw"
+    }
+  },
+  "engine": {
+    "rowTolerance": 3.5
+  }
+}

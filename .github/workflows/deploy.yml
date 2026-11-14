@@ -1,0 +1,87 @@
+name: Build and deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+  schedule:
+    - cron: '0 3 * * 1'
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      # Optional repository variables (Settings > Secrets and variables > Actions > Variables).
+      # SITE_URL: set only when using a custom domain; otherwise the Pages URL is derived automatically.
+      # CHECKOUT_URL: LemonSqueezy / Gumroad checkout link for the Pro key.
+      SITE_URL: ${{ vars.SITE_URL }}
+      CHECKOUT_URL: ${{ vars.CHECKOUT_URL }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Run engine tests
+        run: npm test
+
+      - name: Build static site
+        run: npm run build
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+  indexnow:
+    # Runs after the deployment so the key file and the new pages are live
+    # when search engines validate the submission. Never fails the workflow.
+    needs: deploy
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    env:
+      SITE_URL: ${{ vars.SITE_URL }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Rebuild sitemap
+        run: npm run build
+
+      - name: Ping IndexNow (non-blocking)
+        continue-on-error: true
+        run: node scripts/ping_indexnow.js

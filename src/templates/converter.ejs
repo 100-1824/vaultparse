@@ -1,0 +1,236 @@
+    <section class="vp-chrome mx-auto max-w-6xl px-4 pb-6 pt-10 sm:pt-14">
+<% if (page.breadcrumb) { %>
+      <nav class="vp-crumbs" aria-label="Breadcrumb">
+        <a href="<%= root %>index.html">Home</a><span aria-hidden="true">/</span>
+        <a href="<%= root %>directory.html#<%= page.clusterId %>"><%= page.eyebrow %></a><span aria-hidden="true">/</span>
+        <span aria-current="page"><%= page.name %></span>
+      </nav>
+<% } else { %>
+      <p class="vp-eyebrow"><%= page.eyebrow %></p>
+<% } %>
+      <h1 class="vp-h1"><%= page.h1 %></h1>
+      <p class="vp-lede"><%= page.intro %></p>
+    </section>
+
+    <section id="converter" class="mx-auto max-w-6xl px-4 pb-6" aria-label="PDF converter">
+      <p class="vp-pill"><span aria-hidden="true">🛡️</span> 100% Local In-Browser Execution &mdash; Zero Server Uploads <span aria-hidden="true">&bull;</span> Files Never Leave Your Device</p>
+
+      <div class="vp-panel mt-4 grid gap-4 p-4 lg:grid-cols-[1.3fr_1fr]">
+        <div id="dropzone" class="vp-dropzone" role="button" tabindex="0" aria-label="Drop PDF files here, or press Enter to choose files">
+          <input id="file-input" type="file" accept="application/pdf,.pdf" multiple hidden>
+          <svg viewBox="0 0 48 48" width="44" height="44" aria-hidden="true" class="vp-drop-icon"><path d="M14 6h14l10 10v24a2 2 0 0 1-2 2H14a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/><path d="M28 6v10h10M24 22v12M19 29l5 5 5-5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <p class="vp-drop-title">Drop PDF invoices, receipts or bank statements</p>
+          <p class="vp-drop-sub">Multiple files supported. Digital (text-based) PDFs only; scans need OCR first.</p>
+          <button type="button" id="btn-browse" class="vp-btn vp-btn-accent">Choose PDF files</button>
+          <p id="progress" class="vp-progress" role="status" aria-live="polite"></p>
+        </div>
+
+        <div class="flex flex-col gap-3">
+          <label class="vp-field">
+            <span class="vp-field-label">Parser preset</span>
+            <select id="preset-select" class="vp-input">
+              <option value="auto"<%= page.preset === 'auto' ? ' selected' : '' %>>Auto-Detect</option>
+              <option value="bank"<%= page.preset === 'bank' ? ' selected' : '' %>>Bank Statement</option>
+              <option value="invoice"<%= page.preset === 'invoice' ? ' selected' : '' %>>SaaS / Vendor Invoice</option>
+              <option value="receipt"<%= page.preset === 'receipt' ? ' selected' : '' %>>E-Commerce Receipt</option>
+            </select>
+          </label>
+          <button type="button" id="btn-sample" class="vp-btn vp-btn-outline">Load Realistic Sample Invoice &amp; Bank Statement</button>
+          <p class="text-xs vp-muted">No file handy? The sample loads instantly so you can try editing and exporting. Free tier: unlimited single files, up to <%= freeBatchLimit %> files per batch.</p>
+          <p class="vp-telemetry" aria-label="Live client-side telemetry">
+            <span class="vp-dot" aria-hidden="true"></span>
+            <span>Memory Used: <b id="tel-mem">&ndash;</b></span>
+            <span aria-hidden="true">&bull;</span>
+            <span title="Runtime requests that could carry data off this device (static library files excluded)">Server Calls: <b id="tel-calls">0</b></span>
+            <span aria-hidden="true">&bull;</span>
+            <span>Processing Speed: <b id="tel-speed">ready</b></span>
+          </p>
+        </div>
+      </div>
+      <noscript><p class="vp-warning mt-3">JavaScript is required: the converter runs entirely in your browser, so there is no server to do the work instead.</p></noscript>
+    </section>
+
+    <section id="workspace" class="mx-auto max-w-6xl px-4 pb-10" aria-label="Extracted data workspace" hidden>
+      <div class="mb-3 flex flex-wrap items-center gap-2">
+        <div id="doc-tabs" class="vp-chips" aria-label="Loaded documents"></div>
+        <button type="button" id="btn-clear" class="vp-btn vp-btn-ghost vp-btn-sm ml-auto">Clear all</button>
+      </div>
+
+      <div class="grid gap-4 lg:grid-cols-[300px_minmax(0,1fr)]">
+        <aside class="vp-card p-4" aria-label="Document summary">
+          <h2 class="vp-h3">Document summary</h2>
+          <div id="summary-grid" class="mt-3 grid grid-cols-2 gap-2 lg:grid-cols-1"></div>
+          <p id="reconcile-badge" class="vp-reconcile" hidden></p>
+          <div id="warnings"></div>
+        </aside>
+
+        <div class="vp-card min-w-0">
+          <div class="vp-tabs" role="tablist" aria-label="Preview">
+            <button type="button" role="tab" id="tab-grid" aria-controls="panel-grid" aria-selected="true">Editable data grid</button>
+            <button type="button" role="tab" id="tab-code" aria-controls="panel-code" aria-selected="false" tabindex="-1">JSON / CSV inspector</button>
+            <span id="row-count" class="ml-auto pr-3 text-xs vp-muted"></span>
+          </div>
+
+          <div id="panel-grid" role="tabpanel" aria-labelledby="tab-grid">
+            <div id="grid-host" class="vp-grid-host"></div>
+            <div class="flex flex-wrap items-center gap-3 px-3 py-2">
+              <button type="button" id="btn-add-row" class="vp-btn vp-btn-ghost vp-btn-sm">+ Add row</button>
+              <span class="text-xs vp-muted">Click a cell or a column title to edit. Enter saves, Esc cancels, &times; deletes a noisy row.</span>
+            </div>
+          </div>
+
+          <div id="panel-code" role="tabpanel" aria-labelledby="tab-code" hidden>
+            <div class="flex items-center gap-2 px-3 py-2">
+              <div class="vp-seg" role="group" aria-label="Code format">
+                <button type="button" data-code-format="json" aria-pressed="true">JSON</button>
+                <button type="button" data-code-format="csv" aria-pressed="false">CSV</button>
+              </div>
+              <button type="button" id="btn-copy-code" class="vp-btn vp-btn-ghost vp-btn-sm ml-auto">Copy</button>
+            </div>
+            <pre class="vp-code" tabindex="0" aria-label="Live code preview"><code id="code-view"></code></pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="vp-card mt-4 p-4">
+        <div class="flex flex-wrap items-center gap-2">
+          <h2 class="vp-h3 mr-2">Export</h2>
+          <button type="button" class="vp-btn vp-btn-outline" data-export="csv">Standard CSV</button>
+          <button type="button" class="vp-btn vp-btn-outline" data-export="xlsx">Excel (.xlsx)</button>
+          <button type="button" class="vp-btn vp-btn-outline" data-export="json">Clean JSON</button>
+          <span class="vp-divider" aria-hidden="true"></span>
+          <button type="button" class="vp-btn vp-btn-outline" data-export="xero">Xero Bank CSV <span class="vp-tag">PRO</span></button>
+          <button type="button" class="vp-btn vp-btn-outline" data-export="qbo">QuickBooks Online CSV <span class="vp-tag">PRO</span></button>
+          <button type="button" class="vp-btn vp-btn-outline" data-export="iif">QuickBooks IIF <span class="vp-tag">PRO</span></button>
+        </div>
+        <p class="mt-2 text-xs vp-muted">Exports include every loaded document. Excel puts each file on its own sheet plus a Summary sheet. Files are generated in memory and saved straight to your downloads folder.</p>
+      </div>
+
+      <details class="vp-card mt-4 p-4">
+        <summary class="vp-h3 cursor-pointer">Custom regex template <span class="vp-muted font-normal">&mdash; for layouts the built-in rules miss</span></summary>
+        <p class="mt-3 text-sm vp-muted">Write one regular expression with named groups; it is tested against every reconstructed text row of the active document. Group names become columns (<code>date</code>, <code>description</code>, <code>amount</code>, <code>balance</code>, <code>qty</code>&hellip;).</p>
+        <label class="vp-field mt-3">
+          <span class="vp-field-label">Pattern</span>
+          <textarea id="tpl-regex" class="vp-input vp-mono" rows="2" spellcheck="false" placeholder="^(?&lt;date&gt;\d{2}/\d{2}/\d{4})\s+(?&lt;description&gt;.+?)\s+(?&lt;amount&gt;-?[\d,]+\.\d{2})$"></textarea>
+        </label>
+        <div class="mt-3 flex flex-wrap items-end gap-2">
+          <button type="button" id="btn-tpl-apply" class="vp-btn vp-btn-accent vp-btn-sm">Apply to this document</button>
+          <button type="button" id="btn-tpl-reset" class="vp-btn vp-btn-ghost vp-btn-sm">Reset to built-in rules</button>
+          <span class="vp-divider" aria-hidden="true"></span>
+          <label class="vp-field">
+            <span class="vp-field-label">Template name</span>
+            <input id="tpl-name" class="vp-input" type="text" maxlength="60" autocomplete="off" placeholder="e.g. Supplier X statement">
+          </label>
+          <button type="button" id="btn-tpl-save" class="vp-btn vp-btn-outline vp-btn-sm">Save template <span class="vp-tag">PRO</span></button>
+          <label class="vp-field">
+            <span class="vp-field-label">Saved</span>
+            <select id="tpl-saved" class="vp-input"></select>
+          </label>
+        </div>
+      </details>
+    </section>
+
+    <section id="empty-hint" class="vp-chrome mx-auto max-w-6xl px-4 pb-10">
+      <div class="grid gap-4 sm:grid-cols-3">
+<% page.steps.forEach(function (step, index) { %>
+        <div class="vp-card p-5">
+          <p class="vp-step"><%= index + 1 %></p>
+          <h2 class="vp-h3 mt-3"><%= step.title %></h2>
+          <p class="mt-2 text-sm vp-muted"><%= step.text %></p>
+        </div>
+<% }); %>
+      </div>
+    </section>
+
+    <section class="vp-chrome mx-auto max-w-6xl px-4 pb-12">
+      <div class="grid gap-8 lg:grid-cols-[1fr_1fr]">
+        <div>
+          <h2 class="vp-h2"><%= page.detailTitle %></h2>
+<% page.detail.forEach(function (paragraph) { %>
+          <p class="mt-3 vp-body"><%= paragraph %></p>
+<% }); %>
+<% if (page.hint) { %>
+          <div class="vp-note mt-5">
+            <p class="vp-note-title">Good to know</p>
+            <p class="mt-1 text-sm"><%= page.hint %></p>
+          </div>
+<% } %>
+        </div>
+        <div>
+          <h2 class="vp-h2">What gets extracted</h2>
+          <ul class="vp-checks mt-3">
+<% page.extracted.forEach(function (item) { %>
+            <li><%= item %></li>
+<% }); %>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="vp-chrome mx-auto max-w-6xl px-4 pb-12" aria-labelledby="faq-title">
+      <h2 id="faq-title" class="vp-h2">Frequently asked questions</h2>
+      <div class="mt-4 grid gap-3">
+<% page.faqs.forEach(function (faq, index) { %>
+        <details class="vp-faq"<%= index === 0 ? ' open' : '' %>>
+          <summary><%= faq.q %></summary>
+          <p><%= faq.a %></p>
+        </details>
+<% }); %>
+      </div>
+    </section>
+
+    <section class="vp-chrome mx-auto max-w-6xl px-4 pb-16" aria-labelledby="related-title">
+      <div class="flex flex-wrap items-end gap-3">
+        <h2 id="related-title" class="vp-h2"><%= page.relatedTitle %></h2>
+        <a href="<%= root %>directory.html" class="vp-link ml-auto text-sm">Browse all <%= pageCount %> converters &rarr;</a>
+      </div>
+      <ul class="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+<% related.forEach(function (tool) { %>
+        <li><a class="vp-tool" href="<%= root %>tools/<%= tool.slug %>.html"><span class="vp-tool-name"><%= tool.name %></span><span class="vp-tool-meta"><%= tool.formatLabel %> &middot; <%= tool.presetLabel %></span></a></li>
+<% }); %>
+      </ul>
+      <p class="mt-6"><button type="button" class="vp-btn vp-btn-outline" data-open="embed">&lt;/&gt; Embed Free Converter on Your Site</button></p>
+    </section>
+
+    <dialog id="modal-pro" class="vp-dialog" aria-labelledby="pro-title">
+      <div class="vp-dialog-body">
+        <button type="button" class="vp-dialog-close" data-close aria-label="Close">&times;</button>
+        <p class="vp-eyebrow"><%= brand.name %> Pro</p>
+        <h2 id="pro-title" class="vp-h2"><%= pro.priceLabel %> <span class="text-base font-normal vp-muted"><%= pro.priceNote %></span></h2>
+        <p id="pro-reason" class="mt-2 text-sm vp-muted"></p>
+        <ul class="vp-checks mt-4">
+          <li>Unlimited files per batch (free tier: <%= freeBatchLimit %>)</li>
+          <li>Xero bank import CSV, QuickBooks Online CSV and QuickBooks IIF presets</li>
+          <li>Save and reuse custom regex extraction templates</li>
+          <li>Key is checked offline in your browser &mdash; no account, no tracking</li>
+        </ul>
+        <div id="pro-form" class="mt-5">
+          <a id="btn-buy" class="vp-btn vp-btn-accent w-full justify-center" href="#" target="_blank" rel="noopener" hidden>Get a lifetime key &mdash; <%= pro.priceLabel %></a>
+          <p id="buy-pending" class="vp-note text-sm" hidden>Online checkout is being set up. If you already have a key, enter it below.</p>
+          <label class="vp-field mt-4">
+            <span class="vp-field-label">Already have a key?</span>
+            <input id="license-input" class="vp-input vp-mono" type="text" autocomplete="off" spellcheck="false" placeholder="VP-XXXXX-XXXXX-XXXXX-XXXXX" maxlength="40">
+          </label>
+          <button type="button" id="btn-activate" class="vp-btn vp-btn-outline mt-2 w-full justify-center">Activate key</button>
+          <p id="license-status" class="vp-status mt-2" role="status" aria-live="polite"></p>
+        </div>
+        <div id="pro-active" class="mt-5" hidden>
+          <p class="vp-reconcile" data-status="ok">&#10003; Pro is active on this browser.</p>
+          <button type="button" id="btn-deactivate" class="vp-btn vp-btn-ghost vp-btn-sm mt-3">Remove key from this browser</button>
+        </div>
+      </div>
+    </dialog>
+
+    <dialog id="modal-embed" class="vp-dialog" aria-labelledby="embed-title">
+      <div class="vp-dialog-body">
+        <button type="button" class="vp-dialog-close" data-close aria-label="Close">&times;</button>
+        <p class="vp-eyebrow">Free widget</p>
+        <h2 id="embed-title" class="vp-h2">Embed this converter on your site</h2>
+        <p class="mt-2 text-sm vp-muted">Paste the snippet into any page or blog post. Your readers get a private, in-browser converter; their files still never leave their device. Please keep the attribution link.</p>
+        <label class="vp-field mt-4">
+          <span class="vp-field-label">HTML snippet</span>
+          <textarea id="embed-code" class="vp-input vp-mono" rows="7" readonly spellcheck="false"></textarea>
+        </label>
+        <button type="button" id="btn-copy-embed" class="vp-btn vp-btn-accent mt-3 w-full justify-center">Copy embed code</button>
+      </div>
+    </dialog>

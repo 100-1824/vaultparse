@@ -1,0 +1,21 @@
+{
+  "name": "vaultparse",
+  "version": "1.0.0",
+  "description": "100% client-side PDF invoice, receipt and bank statement to CSV / Excel / JSON converter with a programmatic SEO static site generator.",
+  "private": true,
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "build": "node scripts/build.js",
+    "test": "node scripts/test.js",
+    "serve": "node scripts/serve.js",
+    "indexnow": "node scripts/ping_indexnow.js",
+    "license:generate": "node scripts/generate_license.js"
+  },
+  "devDependencies": {
+    "ejs": "^3.1.10",
+    "tailwindcss": "^3.4.17"
+  }
+}
